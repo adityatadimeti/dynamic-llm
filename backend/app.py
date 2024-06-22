@@ -14,8 +14,8 @@ app = Flask(__name__)
 @app.route('/encrypt')
 def encrypt():
     apikey = request.args.get('apiKey')  
-
-    with open('secrets.json', 'r') as file:
+    print()
+    with open('backend/secrets.json', 'r') as file:
         keys = json.load(file)
         publicKey = keys['public_key']
     print(publicKey)

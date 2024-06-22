@@ -71,6 +71,7 @@ function App() {
         const response = await fetch(`/encrypt?${queryString}`, {
           method: "GET",
         });
+        console.log(response);
         const data = await response.json();
         return data;
       } catch (error) {
