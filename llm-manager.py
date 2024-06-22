@@ -13,11 +13,6 @@ class LLMManager:
         self.llms = llms
         self.current_index = 0
 
-    # def get_next_llm(self):
-    #     llm = self.llms[self.current_index]
-    #     self.current_index = (self.current_index + 1) % len(self.llms)
-    #     return llm
-
     # If it was a good response then try the cheaper model.
     def get_next_llm(self, good_model):
         if good_model:
