@@ -61,10 +61,8 @@ def main():
 
     chat_history = [system_prompt]
     
-
+    good_model = True
     while True:
-        good_model = True
-        
         llm = llm_manager.get_next_llm(good_model)
         client = llm.client
         model_name = llm.model_name
