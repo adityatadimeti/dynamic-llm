@@ -40,9 +40,15 @@ openai_client = OpenAI(
 )
 
 llm_options = [
+    LLM(client=groq_client, model_name="gemma-7b-it"),
     LLM(client=groq_client, model_name="llama3-8b-8192"),
-    LLM(client=openai_client, model_name="gpt-3.5-turbo")
+    LLM(client=groq_client, model_name="llama3-70b-8192"),
+    LLM(client=openai_client, model_name="gpt-3.5-turbo"),
+    LLM(client=openai_client, model_name="gpt-4o")
 ]
+
+llm_tokenizers = {}
+
 
 llm_manager = LLMManager(llm_options)
 
