@@ -13,10 +13,17 @@ class LLMManager:
         self.llms = llms
         self.current_index = 0
 
-    def get_next_llm(self):
-        llm = self.llms[self.current_index]
-        self.current_index = (self.current_index + 1) % len(self.llms)
-        return llm
+    # def get_next_llm(self):
+    #     llm = self.llms[self.current_index]
+    #     self.current_index = (self.current_index + 1) % len(self.llms)
+    #     return llm
+
+    # If it was a good response then try the cheaper model.
+    def get_next_llm(self, good_model):
+        if good_model:
+            return llm_manager.llms[0]
+        else:
+            return llm_manager.llms[1]
 
     def get_llm_by_model_name(self, model_name):
         for llm in self.llms:
@@ -38,8 +45,8 @@ openai_client = OpenAI(
 )
 
 llm_options = [
-    LLM(client=openai_client, model_name="gpt-3.5-turbo"),
-    LLM(client=groq_client, model_name="llama3-8b-8192")
+    LLM(client=groq_client, model_name="llama3-8b-8192"),
+    LLM(client=openai_client, model_name="gpt-3.5-turbo")
 ]
 
 llm_manager = LLMManager(llm_options)
@@ -56,7 +63,9 @@ def main():
     
 
     while True:
-        llm = llm_manager.get_next_llm()
+        good_model = True
+        
+        llm = llm_manager.get_next_llm(good_model)
         client = llm.client
         model_name = llm.model_name
 
@@ -76,6 +85,15 @@ def main():
                 "content": assistant_response
             })
             print(f"Assistant ({model_name}):", assistant_response)
+
+            was_good_model = input("Was the model response good? (y/n): ")
+            if was_good_model == "y":
+                good_model = True
+            elif was_good_model == "n":
+                good_model = False
+            else:
+                print("Invalid input. Please enter 'y' or 'n'.")
+
         except Exception as e:
             print(f"An error occurred: {e}")
 
