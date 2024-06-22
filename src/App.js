@@ -5,7 +5,6 @@ import { firebaseConfig } from "./firebaseConfig.js"; // Ensure this path is cor
 import React, { useEffect, useState } from "react";
 import { getDatabase, ref, child, push, update, set } from "firebase/database";
 import styled from "styled-components";
-import secrets from "./secrets.json";
 
 const Input = styled.input`
   padding: 10px;
