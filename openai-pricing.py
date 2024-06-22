@@ -1,6 +1,6 @@
 import tiktoken
 
-# per 1000 tokens
+# Create a dictionary with the pricing for each model, in $ per 1 token
 pricing_dict = {}
 
 pricing_dict["gpt-4o_input"] = 0.005 / 1000
