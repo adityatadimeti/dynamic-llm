@@ -16,3 +16,6 @@ sentencepiece==0.1.99
 tiktoken==0.7.0
 typing_extensions==4.12.2
 urllib3==2.2.2
+groq==0.9.0
+openai==1.35.3
+python-dotenv==1.0.1
