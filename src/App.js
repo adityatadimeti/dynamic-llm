@@ -45,7 +45,7 @@ const Dropdown = styled.select`
 function App() {
   const [inputText, setInputText] = useState("");
   const [username, setUsername] = useState("");
-  const [selectedKey, setSelectedKey] = useState("key1");
+  const [selectedKey, setSelectedKey] = useState("GPT4");
   const [encryptedData, setEncryptedData] = useState("");
 
   const handleUsernameChange = (event) => {
