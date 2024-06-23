@@ -441,6 +441,11 @@ function App() {
             value={username}
             onChange={handleUsernameChange}
             placeholder="Enter your username"
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                retrieveUser();
+              }
+            }}
           />
           <Button onClick={retrieveUser}>Retrieve</Button>
         </div>
@@ -470,41 +475,36 @@ function App() {
           />
           <Button onClick={handleSubmit}>Submit</Button>
         </div>
-        {showModelPlayground ? (
-          <>
-            <div
-              style={{
-                backgroundColor: "#42b3f5",
-                padding: "20px",
-                marginTop: "20px",
-                borderRadius: "20px",
-                width: "400px",
-                display: "flex",
-                flexDirection: "column",
-                marginBottom: "20px",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {isGenerated ? (
-                <Container>
-                  <SubText>{"Model: " + modelName}</SubText>
-                  <SubText>{"Pricing: $" + Number(modelPricing).toExponential(3)}</SubText>
-                  <a style={{ marginTop: "20px" }}>did you like this output?</a>
-
-                  <YesNoQuestionContainer>
-                    <Button
-                      onClick={yesGoodModel}
-                      style={{ marginRight: "20px" }}
-                    >
-                      Yes
-                    </Button>
-                    <Button onClick={noGoodModel}>No</Button>
-                  </YesNoQuestionContainer>
-                </Container>
-              ) : null}
-            </div>
-          </>
+        {isGenerated && showModelPlayground ? (
+          <div
+            style={{
+              backgroundColor: "#42b3f5",
+              padding: "20px",
+              marginTop: "20px",
+              borderRadius: "20px",
+              width: "400px",
+              display: "flex",
+              flexDirection: "column",
+              marginBottom: "20px",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Container>
+              <SubText>{"Model: " + modelName}</SubText>
+              <SubText>{"Pricing: $" + Number(modelPricing).toExponential(3)}</SubText>
+              <a style={{ marginTop: "20px" }}>did you like this output?</a>
+              <YesNoQuestionContainer>
+                <Button
+                  onClick={yesGoodModel}
+                  style={{ marginRight: "20px" }}
+                >
+                  Yes
+                </Button>
+                <Button onClick={noGoodModel}>No</Button>
+              </YesNoQuestionContainer>
+            </Container>
+          </div>
         ) : null}
 
         {/* New Chat UI */}
