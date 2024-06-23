@@ -95,7 +95,7 @@ function App() {
   const [modelPricing, setModelPricing] = useState("");
   const [goodModel, setGoodModel] = useState(true);
   const [isGenerated, setIsGenerated] = useState(false);
-  const [chatHistory, setChatHistory] = useState([system_prompt]);
+  const [chatHistory, setChatHistory] = useState([systemPrompt]);
   const [curIndex, setCurIndex] = useState(0);
   const [convoId, setConvoId] = useState("");
   const [showModelPlayground, setShowModelPlayground] = useState(false);
@@ -234,6 +234,8 @@ function App() {
   function passToAPI() {
     let modelData;
 
+    setPrompt("");
+
     generateTextAPICall(prompt).then((output) => {
       modelData = output;
       console.log(output);
@@ -327,7 +329,7 @@ function App() {
     }
     console.log("Submitting", inputText);
 
-    async function fetchData() {
+    async function encryptData() {
       const postData = {
         apiKey: inputText,
       };
@@ -344,7 +346,7 @@ function App() {
       }
     }
 
-    fetchData().then((encryptedData) => {
+    encryptData().then((encryptedData) => {
       console.log(encryptedData);
       const userRef = ref(db, `users/${username}`);
 
