@@ -74,6 +74,15 @@ export const YesNoQuestionContainer = styled.div`
 `;
 
 function App() {
+  const system_text =
+    "You are a helpful assistant. You reply with very short answers.";
+
+  const system_prompt = {
+    role: "system",
+    content: system_text,
+  };
+
+  const [systemPrompt, setSystemPrompt] = useState(system_prompt);
   const [inputText, setInputText] = useState("");
   const [prompt, setPrompt] = useState("");
   const [username, setUsername] = useState("");
@@ -87,6 +96,8 @@ function App() {
   const [modelPricing, setModelPricing] = useState("");
   const [goodModel, setGoodModel] = useState(true);
   const [isGenerated, setIsGenerated] = useState(false);
+  const [chatHistory, setChatHistory] = useState([system_prompt]);
+  const [curIndex, setCurIndex] = useState(0);
 
   // if the user exists, set the genmodel options to the keys in the user data
   useEffect(() => {
@@ -140,17 +151,6 @@ function App() {
   }
 
   async function generateTextAPICall(model, prompt) {
-    const system_text =
-      "You are a helpful assistant. You reply with very short answers.";
-    const system_prompt = {
-      role: "system",
-      content: system_text,
-    };
-
-    let chat_history = [system_prompt];
-
-    let cur_index = 0;
-
     let data;
     try {
       const response = await fetch(`/create_llm_manager`, {
@@ -165,8 +165,8 @@ function App() {
     let data2;
     const postData = {
       good_model: goodModel,
-      cur_index: cur_index,
-      chat_history: chat_history,
+      cur_index: curIndex,
+      chat_history: chatHistory,
       llm_manager: data,
       user_input: prompt,
     };
@@ -230,9 +230,12 @@ function App() {
       //console.log(output)
       // console.log(output);
       modelData = output;
+      console.log(output);
       setModelOutput(modelData.assistant_response);
       setModelName(modelData.model_name);
       setModelPricing(modelData.pricing);
+      setChatHistory(modelData.chat_history);
+      setCurIndex(modelData.cur_index);
       setIsGenerated(true);
     });
   };
