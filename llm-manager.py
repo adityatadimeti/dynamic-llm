@@ -4,7 +4,7 @@ import os
 from groq import Groq
 from openai import OpenAI
 import time
-
+from pricing import get_pricing
 
 load_dotenv()
 
@@ -39,8 +39,9 @@ openai_client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY")
 )
 
+
 llm_options = [
-    LLM(client=groq_client, model_name="gemma-7b-it"),
+    LLM(client=groq_client, model_name="open-mixtral-8x7b"),
     LLM(client=groq_client, model_name="llama3-8b-8192"),
     LLM(client=groq_client, model_name="llama3-70b-8192"),
     LLM(client=openai_client, model_name="gpt-3.5-turbo"),
@@ -48,7 +49,6 @@ llm_options = [
 ]
 
 llm_tokenizers = {}
-
 
 llm_manager = LLMManager(llm_options)
 
@@ -84,6 +84,7 @@ def main():
                 "content": assistant_response
             })
             print(f"Assistant ({model_name}):", assistant_response)
+            print("Input text pricing: ", get_pricing(model_name, user_input))
 
             was_good_model = input("Was the model response good? (y/n): ")
             if was_good_model == "y":
