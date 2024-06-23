@@ -54,5 +54,12 @@ def decrypt():
 
     return jsonify({'decryptedData': decrypted_data.decode('utf-8')})
 
+@app.route('/genText')
+def genText():
+    model = request.args.get('model')  
+    prompt = request.args.get('prompt')  
+
+    return jsonify({'output': "output text"})
+
 if __name__ == '__main__':
     app.run(debug=True)  # For development, enable debug mode

@@ -56,8 +56,16 @@ function App() {
   const [username, setUsername] = useState("");
   const [selectedKey, setSelectedKey] = useState("GPT4");
   const [genModel, setGenModel] = useState("");
+  const [genModelOptions, setGenModelOptions] = useState([]);
   const [encryptedData, setEncryptedData] = useState("");
   const [userData, setUserData] = useState({});
+
+  // if the user exists, set the genmodel options to the keys in the user data
+  useEffect(() => {
+    if (Object.keys(userData).length > 0) {
+      setGenModelOptions(Object.keys(userData));
+    }
+  }, [userData]);
 
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
@@ -103,6 +111,24 @@ function App() {
     }
   }
 
+  async function generateTextAPICall(model, prompt) {
+    const postData = {
+      model: model,
+      prompt: prompt,
+    };
+    const queryString = new URLSearchParams(postData).toString();
+    try {
+      const response = await fetch(`/genText?${queryString}`, {
+        method: "GET",
+      });
+      console.log(response);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error generating", error);
+    }
+  }
+
   const retrieveUser = () => {
     async function checkIfSubchildExists(subchildKey) {
       const dbRef = ref(db);
@@ -128,6 +154,15 @@ function App() {
     }
 
     checkIfSubchildExists(username);
+  };
+
+  const generateText = () => {
+    //grab the chosen model
+    //grab the prompt
+    //run it through
+    generateTextAPICall(genModel, prompt).then((output) => {
+      //console.log(output)
+    });
   };
 
   const handleSubmit = () => {
@@ -220,12 +255,11 @@ function App() {
         <a style={{ marginTop: "20px" }}>choose model</a>
         <div style={{ marginTop: "20px" }}>
           <Dropdown value={genModel} onChange={handleGenModelChange}>
-            <option value="GPT4">GPT4</option>
-            <option value="GPT35">GPT3.5</option>
-            <option value="Claude">Claude</option>
-            <option value="Groq">Groq</option>
+            {genModelOptions.map((option) => (
+              <option value={option}>{option}</option>
+            ))}
           </Dropdown>
-          <Button onClick={handleSubmit}>Submit</Button>
+          <Button onClick={generateText}>Submit</Button>
         </div>
       </header>
     </div>
