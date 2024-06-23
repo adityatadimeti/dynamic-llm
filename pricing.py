@@ -12,19 +12,19 @@ mistral_tokenizer_v1 = MistralTokenizer.v1()
 gpt4o_enc = tiktoken.encoding_for_model("gpt-4o")
 gpt35turbo_enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
-pricing_dict["open-mixtral-8x7b"] = (0.24 / 1000000, mistral_tokenizer_v1)
+pricing_dict["mixtral-8x7b-32768"] = (0.24 / 1000000, mistral_tokenizer_v1)
 pricing_dict["gpt-4o"] = (0.005 / 1000, gpt4o_enc)
 pricing_dict["gpt-3.5-turbo"] = (0.0005 / 1000, gpt35turbo_enc)
-pricing_dict["llama-70b-8192"] = (0.59 / 1000000, llama_tokenizer)
-pricing_dict["llama-8b-8192"] = (0.05 / 1000000, llama_tokenizer)
+pricing_dict["llama3-70b-8192"] = (0.59 / 1000000, llama_tokenizer)
+pricing_dict["llama3-8b-8192"] = (0.05 / 1000000, llama_tokenizer)
 
 
 def get_pricing(model, message):
     if model == "gpt-4o" or model == "gpt-3.5-turbo":
         return pricing_dict[model][0] * len(pricing_dict[model][1].encode(message))
-    elif model == "open-mixtral-8x7b":
+    elif model == "mixtral-8x7b-32768":
         return len(pricing_dict[model][1].encode_chat_completion(ChatCompletionRequest(messages=[UserMessage(content=message)])).tokens) * pricing_dict[model][0]
-    elif model == "llama-70b" or model == "llama-8b":
+    elif model == "llama3-70b-8192" or model == "llama3-8b-8192":
         return len(pricing_dict[model][1].encode(message)) * pricing_dict[model][0]
     else:
         return None
