@@ -41,7 +41,6 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-bottom: 20px;
 `;
 
 const Dropdown = styled.select`
@@ -283,7 +282,7 @@ function App() {
   return (
     <div style={{ height: "100%" }}>
       <header className="App-header">
-        <a>enter username</a>
+        <a style={{ marginTop: "20px" }}>enter username</a>
         <div>
           <Input
             type="text"
@@ -328,31 +327,45 @@ function App() {
           onChange={handlePromptChange}
           placeholder="enter prompt"
         />
-        <a style={{ marginTop: "20px" }}>choose model</a>
-        <div style={{ marginTop: "20px" }}>
-          <Dropdown value={genModel} onChange={handleGenModelChange}>
-            {genModelOptions.map((option) => (
-              <option value={option}>{option}</option>
-            ))}
-          </Dropdown>
-          <Button onClick={generateText}>Submit Prompt</Button>
-        </div>
-        {isGenerated ? (
-          <Container>
-            <a style={{ marginTop: "20px" }}>model output</a>
-            <MultilineText>{modelOutput}</MultilineText>
-            <SubText>{modelName}</SubText>
-            <SubText>{"Pricing: $" + modelPricing}</SubText>
-            <a style={{ marginTop: "20px" }}>did you like this output</a>
+        <div
+          style={{
+            backgroundColor: "#42b3f5",
+            padding: "20px",
+            marginTop: "20px",
+            borderRadius: "20px",
+            width: "400px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <a>choose model</a>
+          <div style={{ marginTop: "20px" }}>
+            <Dropdown value={genModel} onChange={handleGenModelChange}>
+              {genModelOptions.map((option) => (
+                <option value={option}>{option}</option>
+              ))}
+            </Dropdown>
+            <Button onClick={generateText}>Submit Prompt</Button>
+          </div>
+          {isGenerated ? (
+            <Container>
+              <a style={{ marginTop: "20px" }}>model output</a>
+              <MultilineText>{modelOutput}</MultilineText>
+              <SubText>{modelName}</SubText>
+              <SubText>{"Pricing: $" + modelPricing}</SubText>
+              <a style={{ marginTop: "20px" }}>did you like this output</a>
 
-            <YesNoQuestionContainer>
-              <Button onClick={yesGoodModel} style={{ marginRight: "20px" }}>
-                Yes
-              </Button>
-              <Button onClick={noGoodModel}>No</Button>
-            </YesNoQuestionContainer>
-          </Container>
-        ) : null}
+              <YesNoQuestionContainer>
+                <Button onClick={yesGoodModel} style={{ marginRight: "20px" }}>
+                  Yes
+                </Button>
+                <Button onClick={noGoodModel}>No</Button>
+              </YesNoQuestionContainer>
+            </Container>
+          ) : null}
+        </div>
       </header>
     </div>
   );
