@@ -19,9 +19,13 @@ pricing_dict["llama-70b"] = (0.59 / 1000000, llama_tokenizer)
 pricing_dict["llama-8b"] = (0.05 / 1000000, llama_tokenizer)
 
 
-input_message = "hello world"
+def get_pricing(model, message):
+    if model == "gpt-4o" or model == "gpt-3.5-turbo":
+        return pricing_dict[model][0] * len(pricing_dict[model][1].encode(message))
+    elif model == "open-mixtral-8x7b":
+        return len(pricing_dict[model][1].encode_chat_completion(ChatCompletionRequest(messages=[UserMessage(content=message)])).tokens) * pricing_dict[model][0]
+    elif model == "llama-70b" or model == "llama-8b":
+        return len(pricing_dict[model][1].encode(message)) * pricing_dict[model][0]
+    else:
+        return None
 
-print("GPT4o price", pricing_dict["gpt-4o"][0] * len(gpt4o_enc.encode(input_message)))
-print("GPT3.5 turbo price", pricing_dict["gpt-3.5-turbo"][0] * len(gpt35turbo_enc.encode(input_message)))
-print("Mistral price", len(mistral_tokenizer_v1.encode_chat_completion(ChatCompletionRequest(messages=[UserMessage(content="hello world")])).tokens) * pricing_dict["open-mixtral-8x7b"][0])
-print("Llama price", len(llama_tokenizer.encode("Hello this is a test")) * pricing_dict["llama-70b"][0])
