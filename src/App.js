@@ -463,14 +463,6 @@ function App() {
         </div>
         {showModelPlayground ? (
           <>
-            <a style={{ marginTop: "20px" }}>enter conversation prompt</a>
-            <Input
-              type="text"
-              value={prompt}
-              style={{ marginTop: "20px" }}
-              onChange={handlePromptChange}
-              placeholder="enter prompt"
-            />
             <div
               style={{
                 backgroundColor: "#42b3f5",
@@ -485,22 +477,11 @@ function App() {
                 justifyContent: "center",
               }}
             >
-              <a>choose model</a>
-              <div style={{ marginTop: "20px" }}>
-                {/* <Dropdown value={genModel} onChange={handleGenModelChange}>
-                  {genModelOptions.map((option) => (
-                    <option value={option}>{option}</option>
-                  ))}
-                </Dropdown> */}
-                <Button onClick={generateText}>Submit Prompt</Button>
-              </div>
               {isGenerated ? (
                 <Container>
-                  <a style={{ marginTop: "20px" }}>model output</a>
-                  <MultilineText>{modelOutput}</MultilineText>
-                  <SubText>{modelName}</SubText>
-                  <SubText>{"Pricing: $" + modelPricing}</SubText>
-                  <a style={{ marginTop: "20px" }}>did you like this output</a>
+                  <SubText>{"Model: " + modelName}</SubText>
+                  <SubText>{"Pricing: $" + Number(modelPricing).toExponential(3)}</SubText>
+                  <a style={{ marginTop: "20px" }}>did you like this output?</a>
 
                   <YesNoQuestionContainer>
                     <Button
@@ -539,6 +520,12 @@ function App() {
               onChange={(e) => {
                 setInputMessage(e.target.value); // Set the input message
                 handlePromptChange(e); // Additional functionality from handlePromptChange
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSendMessage();
+                  generateText();
+                }
               }}
               placeholder="Type your message..."
             />
