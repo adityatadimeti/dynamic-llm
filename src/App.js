@@ -41,13 +41,36 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  padding-bottom: 20px;
 `;
 
 const Dropdown = styled.select`
   padding: 10px;
   margin-right: 10px;
   font-size: 16px;
+`;
+
+const MultilineText = styled.div`
+  white-space: pre-wrap; /* CSS property to handle multiline text */
+  font-size: 16px;
+  line-height: 1.5;
+  color: white;
+  text-align: center;
+  width: 300px;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #333;
+`;
+
+export const SubText = styled.div`
+  font-size: 12px;
+  font-style: italic;
+  color: #666;
+  margin-top: 8px;
+`;
+
+export const YesNoQuestionContainer = styled.div`
+  margin-top: 16px;
 `;
 
 function App() {
@@ -59,6 +82,11 @@ function App() {
   const [genModelOptions, setGenModelOptions] = useState([]);
   const [encryptedData, setEncryptedData] = useState("");
   const [userData, setUserData] = useState({});
+  const [modelOutput, setModelOutput] = useState("");
+  const [modelName, setModelName] = useState("");
+  const [modelPricing, setModelPricing] = useState("");
+  const [goodModel, setGoodModel] = useState(true);
+  const [isGenerated, setIsGenerated] = useState(false);
 
   // if the user exists, set the genmodel options to the keys in the user data
   useEffect(() => {
@@ -112,22 +140,58 @@ function App() {
   }
 
   async function generateTextAPICall(model, prompt) {
-    const postData = {
-      model: model,
-      prompt: prompt,
+    const system_text =
+      "You are a helpful assistant. You reply with very short answers.";
+    const system_prompt = {
+      role: "system",
+      content: system_text,
     };
-    const queryString = new URLSearchParams(postData).toString();
+
+    let chat_history = [system_prompt];
+
+    let cur_index = 0;
+
+    let data;
     try {
-      const response = await fetch(`/genText?${queryString}`, {
+      const response = await fetch(`/create_llm_manager`, {
         method: "GET",
       });
-      console.log(response);
-      const data = await response.json();
-      return data;
+      data = await response.json();
+      //return data;
     } catch (error) {
-      console.error("Error generating", error);
+      console.error("Error llm manager", error);
     }
+
+    let data2;
+    const postData = {
+      good_model: goodModel,
+      cur_index: cur_index,
+      chat_history: chat_history,
+      llm_manager: data,
+      user_input: prompt,
+    };
+    const queryString = new URLSearchParams({
+      data: JSON.stringify(postData),
+    }).toString();
+    try {
+      const response = await fetch(`/process_through_llm_API?${queryString}`, {
+        method: "GET",
+      });
+      data2 = await response.json();
+      //return data;
+    } catch (error) {
+      console.error("Error in process through llm", error);
+    }
+    return data2;
   }
+
+  const yesGoodModel = () => {
+    setGoodModel(true);
+  };
+
+  const noGoodModel = () => {
+    setGoodModel(false);
+  };
 
   const retrieveUser = () => {
     async function checkIfSubchildExists(subchildKey) {
@@ -160,13 +224,22 @@ function App() {
     //grab the chosen model
     //grab the prompt
     //run it through
+    setIsGenerated(false);
+    let modelData;
     generateTextAPICall(genModel, prompt).then((output) => {
       //console.log(output)
+      // console.log(output);
+      modelData = output;
+      setModelOutput(modelData.assistant_response);
+      setModelName(modelData.model_name);
+      setModelPricing(modelData.pricing);
+      setIsGenerated(true);
     });
   };
 
   const handleSubmit = () => {
     //remove leading and trailing spaces and check if empty or not
+
     if (username.trim() === "") {
       alert("Please enter a valid username");
       return;
@@ -205,7 +278,7 @@ function App() {
   };
 
   return (
-    <div>
+    <div style={{ height: "100%" }}>
       <header className="App-header">
         <a>enter username</a>
         <div>
@@ -259,8 +332,24 @@ function App() {
               <option value={option}>{option}</option>
             ))}
           </Dropdown>
-          <Button onClick={generateText}>Submit</Button>
+          <Button onClick={generateText}>Submit Prompt</Button>
         </div>
+        {isGenerated ? (
+          <Container>
+            <a style={{ marginTop: "20px" }}>model output</a>
+            <MultilineText>{modelOutput}</MultilineText>
+            <SubText>{modelName}</SubText>
+            <SubText>{"Pricing: $" + modelPricing}</SubText>
+            <a style={{ marginTop: "20px" }}>did you like this output</a>
+
+            <YesNoQuestionContainer>
+              <Button onClick={yesGoodModel} style={{ marginRight: "20px" }}>
+                Yes
+              </Button>
+              <Button onClick={noGoodModel}>No</Button>
+            </YesNoQuestionContainer>
+          </Container>
+        ) : null}
       </header>
     </div>
   );

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
@@ -7,6 +7,11 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from base64 import b64decode, b64encode
 import json
+from llm_manager import llm_text, process_through_llm
+from llm_manager import LLMManager, LLM
+from groq import Groq
+from openai import OpenAI
+import os
 
 app = Flask(__name__)
 
@@ -53,6 +58,52 @@ def decrypt():
     )
 
     return jsonify({'decryptedData': decrypted_data.decode('utf-8')})
+
+@app.route('/create_llm_manager')
+def create_llm_manager():
+
+    groq_client = Groq(
+        api_key=os.environ.get("GROQ_API_KEY"),
+    )
+    openai_client = OpenAI(
+        api_key=os.environ.get("OPENAI_API_KEY")
+    )
+
+    llm_options = [
+        LLM(client=groq_client, model_name="llama3-8b-8192"),
+        LLM(client=groq_client, model_name="mixtral-8x7b-32768"),
+        LLM(client=openai_client, model_name="gpt-3.5-turbo"),
+        LLM(client=groq_client, model_name="llama3-70b-8192"),
+        LLM(client=openai_client, model_name="gpt-4o")
+    ]
+
+    llm_manager = LLMManager(llm_options)
+    llm_manager_dict = llm_manager.to_dict()
+    #session['llm_manager'] = llm_manager_dict
+    
+    return jsonify(llm_manager_dict)
+
+@app.route('/process_through_llm_API')
+def process_through_llm_API():
+    print("starting from api")
+    data_str = request.args.get('data')
+
+    data = json.loads(data_str)
+    
+    # Now you can access the contents of the dictionary
+    good_model = data.get('good_model')
+    cur_index = data.get('cur_index')
+    chat_history = data.get('chat_history')
+    llm_manager = data.get('llm_manager')
+    user_input = data.get('user_input')
+
+    llm_manager = LLMManager(llm_manager['llms'], llm_manager['current_index'])
+
+    output = process_through_llm(llm_manager, good_model, cur_index, chat_history, user_input)
+
+    print("done from api")
+    return jsonify(output)
+
 
 @app.route('/genText')
 def genText():
