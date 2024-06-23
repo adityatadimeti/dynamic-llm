@@ -391,11 +391,11 @@ function App() {
             >
               <a>choose model</a>
               <div style={{ marginTop: "20px" }}>
-                <Dropdown value={genModel} onChange={handleGenModelChange}>
+                {/* <Dropdown value={genModel} onChange={handleGenModelChange}>
                   {genModelOptions.map((option) => (
                     <option value={option}>{option}</option>
                   ))}
-                </Dropdown>
+                </Dropdown> */}
                 <Button onClick={generateText}>Submit Prompt</Button>
               </div>
               {isGenerated ? (
