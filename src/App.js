@@ -97,7 +97,8 @@ function App() {
   const [isGenerated, setIsGenerated] = useState(false);
   const [chatHistory, setChatHistory] = useState([system_prompt]);
   const [curIndex, setCurIndex] = useState(0);
-
+  const [convoId, setConvoId] = useState("");
+  const [showModelPlayground, setShowModelPlayground] = useState(false);
   // if the user exists, set the genmodel options to the keys in the user data
   useEffect(() => {
     if (Object.keys(userData).length > 0) {
@@ -186,10 +187,12 @@ function App() {
 
   const yesGoodModel = () => {
     setGoodModel(true);
+    console.log("good model");
   };
 
   const noGoodModel = () => {
     setGoodModel(false);
+    console.log("bad model");
   };
 
   const retrieveUser = () => {
@@ -208,8 +211,11 @@ function App() {
           //GPT4: encryptedData
 
           const data = snapshot.val();
+          //remove speicifc key from data
+          delete data["convos"];
           setUserData(data);
           alert("retrieved you");
+          setShowModelPlayground(true);
         }
       } catch (error) {
         console.error("Error checking subchild existence:", error);
@@ -236,6 +242,44 @@ function App() {
       setChatHistory(modelData.chat_history);
       setCurIndex(modelData.cur_index);
       setIsGenerated(true);
+
+      //write to firebase DB
+      if (convoId != "") {
+        const convoRef = ref(db, `users/${username}/convos/${convoId}`);
+
+        const timestamp = new Date().getTime();
+        const data = {
+          [timestamp]: {
+            prompt: prompt,
+            model_name: modelData.model_name,
+            assistant_response: modelData.assistant_response,
+            pricing: modelData.pricing,
+            cur_index: modelData.cur_index,
+            good_model: goodModel,
+          },
+        };
+        update(convoRef, data);
+      } else {
+        const convoRef = ref(db, `users/${username}/convos/`);
+
+        const newConvoRef = push(convoRef);
+        //store that uuid
+        setConvoId(newConvoRef.key);
+        //add current timsetamp
+        const timestamp = new Date().getTime();
+        //just add timestamp under that uuid
+        const data = {
+          [timestamp]: {
+            prompt: prompt,
+            model_name: modelData.model_name,
+            assistant_response: modelData.assistant_response,
+            pricing: modelData.pricing,
+            cur_index: modelData.cur_index,
+            good_model: goodModel,
+          },
+        };
+        update(newConvoRef, data);
+      }
     });
   };
 
@@ -277,6 +321,8 @@ function App() {
 
       setInputText("");
     });
+
+    showModelPlayground(true);
   };
 
   return (
@@ -319,53 +365,61 @@ function App() {
           />
           <Button onClick={handleSubmit}>Submit</Button>
         </div>
-        <a style={{ marginTop: "20px" }}>enter conversation prompt</a>
-        <Input
-          type="text"
-          value={prompt}
-          style={{ marginTop: "20px" }}
-          onChange={handlePromptChange}
-          placeholder="enter prompt"
-        />
-        <div
-          style={{
-            backgroundColor: "#42b3f5",
-            padding: "20px",
-            marginTop: "20px",
-            borderRadius: "20px",
-            width: "400px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <a>choose model</a>
-          <div style={{ marginTop: "20px" }}>
-            <Dropdown value={genModel} onChange={handleGenModelChange}>
-              {genModelOptions.map((option) => (
-                <option value={option}>{option}</option>
-              ))}
-            </Dropdown>
-            <Button onClick={generateText}>Submit Prompt</Button>
-          </div>
-          {isGenerated ? (
-            <Container>
-              <a style={{ marginTop: "20px" }}>model output</a>
-              <MultilineText>{modelOutput}</MultilineText>
-              <SubText>{modelName}</SubText>
-              <SubText>{"Pricing: $" + modelPricing}</SubText>
-              <a style={{ marginTop: "20px" }}>did you like this output</a>
+        {showModelPlayground ? (
+          <>
+            <a style={{ marginTop: "20px" }}>enter conversation prompt</a>
+            <Input
+              type="text"
+              value={prompt}
+              style={{ marginTop: "20px" }}
+              onChange={handlePromptChange}
+              placeholder="enter prompt"
+            />
+            <div
+              style={{
+                backgroundColor: "#42b3f5",
+                padding: "20px",
+                marginTop: "20px",
+                borderRadius: "20px",
+                width: "400px",
+                display: "flex",
+                flexDirection: "column",
+                marginBottom: "20px",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <a>choose model</a>
+              <div style={{ marginTop: "20px" }}>
+                <Dropdown value={genModel} onChange={handleGenModelChange}>
+                  {genModelOptions.map((option) => (
+                    <option value={option}>{option}</option>
+                  ))}
+                </Dropdown>
+                <Button onClick={generateText}>Submit Prompt</Button>
+              </div>
+              {isGenerated ? (
+                <Container>
+                  <a style={{ marginTop: "20px" }}>model output</a>
+                  <MultilineText>{modelOutput}</MultilineText>
+                  <SubText>{modelName}</SubText>
+                  <SubText>{"Pricing: $" + modelPricing}</SubText>
+                  <a style={{ marginTop: "20px" }}>did you like this output</a>
 
-              <YesNoQuestionContainer>
-                <Button onClick={yesGoodModel} style={{ marginRight: "20px" }}>
-                  Yes
-                </Button>
-                <Button onClick={noGoodModel}>No</Button>
-              </YesNoQuestionContainer>
-            </Container>
-          ) : null}
-        </div>
+                  <YesNoQuestionContainer>
+                    <Button
+                      onClick={yesGoodModel}
+                      style={{ marginRight: "20px" }}
+                    >
+                      Yes
+                    </Button>
+                    <Button onClick={noGoodModel}>No</Button>
+                  </YesNoQuestionContainer>
+                </Container>
+              ) : null}
+            </div>
+          </>
+        ) : null}
       </header>
     </div>
   );
