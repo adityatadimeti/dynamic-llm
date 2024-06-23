@@ -99,6 +99,9 @@ function App() {
   const [curIndex, setCurIndex] = useState(0);
   const [convoId, setConvoId] = useState("");
   const [showModelPlayground, setShowModelPlayground] = useState(false);
+  const [retrievePrevContext, setRetrievePreviousContext] = useState(false);
+  const [prevChats, setPrevChats] = useState([]);
+  const [prevResponses, setPrevResponses] = useState([]);
   // if the user exists, set the genmodel options to the keys in the user data
   useEffect(() => {
     if (Object.keys(userData).length > 0) {
@@ -150,7 +153,7 @@ function App() {
     }
   }
 
-  async function generateTextAPICall(model, prompt) {
+  async function generateTextAPICall(prompt) {
     let data;
     try {
       const response = await fetch(`/create_llm_manager`, {
@@ -169,6 +172,8 @@ function App() {
       chat_history: chatHistory,
       llm_manager: data,
       user_input: prompt,
+      prevResponses: prevResponses,
+      prevChats: prevChats,
     };
     const queryString = new URLSearchParams({
       data: JSON.stringify(postData),
@@ -192,6 +197,7 @@ function App() {
 
   const noGoodModel = () => {
     setGoodModel(false);
+    setRetrievePreviousContext(true);
     console.log("bad model");
   };
 
@@ -225,15 +231,10 @@ function App() {
     checkIfSubchildExists(username);
   };
 
-  const generateText = () => {
-    //grab the chosen model
-    //grab the prompt
-    //run it through
-    setIsGenerated(false);
+  function passToAPI() {
     let modelData;
-    generateTextAPICall(genModel, prompt).then((output) => {
-      //console.log(output)
-      // console.log(output);
+
+    generateTextAPICall(prompt).then((output) => {
       modelData = output;
       console.log(output);
       setModelOutput(modelData.assistant_response);
@@ -281,6 +282,40 @@ function App() {
         update(newConvoRef, data);
       }
     });
+  }
+
+  const generateText = () => {
+    //grab the chosen model
+    //grab the prompt
+    //run it through
+    setIsGenerated(false);
+
+    if (retrievePrevContext) {
+      //go through the DB, go to the convo id, and get all the entries in an array
+      async function getPrevData() {
+        const convoRef = ref(db, `users/${username}/convos/${convoId}`);
+        setPrevChats([]);
+        setPrevResponses([]);
+        await get(convoRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            //go through the entries in this snapshot and add all the prompts to one list and all the responses to another list
+            const data = snapshot.val();
+            for (const key in data) {
+              prevChats.push(data[key]["prompt"]);
+              setPrevChats(prevChats);
+              prevResponses.push(data[key]["assistant_response"]);
+              setPrevResponses(prevResponses);
+              passToAPI();
+            }
+            console.log("Retrieved previous context");
+            setRetrievePreviousContext(false);
+          }
+        });
+      }
+      getPrevData();
+    } else {
+      passToAPI();
+    }
   };
 
   const handleSubmit = () => {
@@ -322,7 +357,7 @@ function App() {
       setInputText("");
     });
 
-    showModelPlayground(true);
+    setShowModelPlayground(true);
   };
 
   return (

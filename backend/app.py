@@ -96,6 +96,22 @@ def process_through_llm_API():
     chat_history = data.get('chat_history')
     llm_manager = data.get('llm_manager')
     user_input = data.get('user_input')
+    prevOutputs = data.get('prevChats')
+    prevResponses = data.get('prevResponses')
+
+
+    # go through each prev output and prev response and add it to the user_input by saying "here are the previous inputs and responses by the user for this conversation. Please add this to your context when processing the user's new prompt, specific earlier"
+    
+    if len(prevOutputs) > 0:
+        user_input += ". Here are the previous inputs and responses by the user for this conversation. Please add this to your context when generating text for the user's new prompt, specified earlier. The user did not like those previous outputs, so take that into consideration. But still understand that information about what the user asked and what got generated and the fact that they didnt like it. When processing the user's prompt now, specified after User:, please take this into consideration. "
+        for i in range(len(prevOutputs)):
+            user_input += "Previous input number " + str(i+1) + ": "
+            user_input += prevOutputs[i]
+            user_input += ". Response to that input: "
+            user_input += prevResponses[i]
+            user_input += ". "
+        user_input += "Now answer the user's new prompt, based on the context provided."
+        
 
     llm_manager = LLMManager(llm_manager['llms'], llm_manager['current_index'])
 
