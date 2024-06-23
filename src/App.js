@@ -72,6 +72,53 @@ export const YesNoQuestionContainer = styled.div`
   margin-top: 16px;
 `;
 
+const ChatContainer = styled.div`
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+`;
+
+const ChatMessages = styled.div`
+  height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+`;
+
+const ChatInputContainer = styled.div`
+  display: flex;
+  padding: 10px;
+  background-color: #fff;
+`;
+
+const ChatInput = styled.input`
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+`;
+
+const ChatSendButton = styled(Button)`
+  width: 80px;
+`;
+
+const Message = styled.div`
+  margin-bottom: 10px;
+  ${props => props.isUser ? 'text-align: right;' : ''}
+`;
+
+const MessageContent = styled.span`
+  background-color: ${props => props.isUser ? '#007bff' : '#e9e9e9'};
+  color: ${props => props.isUser ? 'white' : 'black'};
+  padding: 5px 10px;
+  border-radius: 10px;
+  display: inline-block;
+`;
+
 function App() {
   const system_text =
     "You are a helpful assistant. You reply with very short answers.";
@@ -102,6 +149,10 @@ function App() {
   const [retrievePrevContext, setRetrievePreviousContext] = useState(false);
   const [prevChats, setPrevChats] = useState([]);
   const [prevResponses, setPrevResponses] = useState([]);
+  
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState("");
+
   // if the user exists, set the genmodel options to the keys in the user data
   useEffect(() => {
     if (Object.keys(userData).length > 0) {
@@ -362,6 +413,14 @@ function App() {
     setShowModelPlayground(true);
   };
 
+  const handleSendMessage = () => {
+    if (inputMessage.trim() !== "") {
+      setMessages([...messages, { role: "user", text: inputMessage }]);
+      setInputMessage("");
+      generateText();
+    }
+  };
+
   return (
     <div style={{ height: "100%" }}>
       <header className="App-header">
@@ -457,6 +516,38 @@ function App() {
             </div>
           </>
         ) : null}
+
+        {/* New Chat UI */}
+        <ChatContainer>
+          <ChatMessages>
+            {messages.map((msg, index) => (
+              <Message key={index} isUser={msg.role === "user"}>
+                <MessageContent isUser={msg.role === "user"}>
+                  <strong>{msg.role}: </strong>{msg.text}
+                </MessageContent>
+              </Message>
+            ))}
+            <Message isUser={false}>
+              <MessageContent isUser={false}>{modelOutput}</MessageContent>
+            </Message>
+          </ChatMessages>
+          
+          <ChatInputContainer>
+            <ChatInput
+              type="text"
+              value={inputMessage}
+              onChange={(e) => {
+                setInputMessage(e.target.value); // Set the input message
+                handlePromptChange(e); // Additional functionality from handlePromptChange
+              }}
+              placeholder="Type your message..."
+            />
+            <ChatSendButton onClick={() => {
+              handleSendMessage();
+              generateText();
+            }}>Send</ChatSendButton>
+          </ChatInputContainer>
+        </ChatContainer>
       </header>
     </div>
   );
