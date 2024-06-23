@@ -14,11 +14,9 @@ app = Flask(__name__)
 @app.route('/encrypt')
 def encrypt():
     apikey = request.args.get('apiKey')  
-    print()
     with open('secrets.json', 'r') as file:
         keys = json.load(file)
         publicKey = keys['public_key']
-    print(publicKey)
 
     public_key_bytes = b64decode(publicKey)
     public_key = load_pem_public_key(public_key_bytes, default_backend())
@@ -32,6 +30,29 @@ def encrypt():
     )
 
     return jsonify({'encryptedData': b64encode(encryptedData).decode('utf-8')})
+
+@app.route('/decrypt')
+def decrypt():
+    data = request.args.get('data')  
+
+    with open('secrets.json', 'r') as file:
+        keys = json.load(file)
+        privateKey = keys['private_key']
+
+    private_key_bytes = b64decode(privateKey)
+    private_key = serialization.load_pem_private_key(private_key_bytes, password=None, backend=default_backend())
+
+    encrypted_data_bytes = b64decode(data)
+    decrypted_data = private_key.decrypt(
+        encrypted_data_bytes,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    return jsonify({'decryptedData': decrypted_data.decode('utf-8')})
 
 if __name__ == '__main__':
     app.run(debug=True)  # For development, enable debug mode
