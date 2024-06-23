@@ -2,7 +2,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import firebase from "firebase/compat/app";
 import { firebaseConfig } from "./firebaseConfig.js"; // Ensure this path is correct
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   getDatabase,
   ref,
@@ -152,6 +152,15 @@ function App() {
   
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
+
+  const chatMessagesRef = useRef(null); // Create a ref for the chat messages container
+
+  useEffect(() => {
+    if (chatMessagesRef.current) {
+      const { scrollHeight, clientHeight } = chatMessagesRef.current;
+      chatMessagesRef.current.scrollTop = scrollHeight - clientHeight;
+    }
+  }, [messages]); // Dependency array includes messages to trigger effect on message change
 
   // if the user exists, set the genmodel options to the keys in the user data
   useEffect(() => {
@@ -500,7 +509,7 @@ function App() {
 
         {/* New Chat UI */}
         <ChatContainer>
-          <ChatMessages>
+          <ChatMessages ref={chatMessagesRef}>
             {messages.map((msg, index) => (
               <Message key={index} isUser={msg.role === "user"}>
                 <MessageContent isUser={msg.role === "user"}>
