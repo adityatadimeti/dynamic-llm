@@ -192,13 +192,13 @@ function App() {
 
   const yesGoodModel = () => {
     setGoodModel(true);
-    console.log("good model");
+    alert("feedback received");
   };
 
   const noGoodModel = () => {
     setGoodModel(false);
     setRetrievePreviousContext(true);
-    console.log("bad model");
+    alert("feedback received");
   };
 
   const retrieveUser = () => {
